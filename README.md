@@ -1,6 +1,6 @@
 # Emporium Library
 
-This repository contains the Solver mechanisms of Emporium to create, execute, and validate the state of parallel intent declarations and transactions. This is the fastest way to get up and running with the an intent-based architecture.
+This repository contains the Solver and Signer mechanisms of Emporium to create, execute, and validate the state of parallel intent declarations and transactions. This is the fastest way to get up and running with the an intent-based architecture.
 
 Built using:
 
@@ -14,8 +14,11 @@ To install this library in your repository for personal use run:
 pnpm i @nftchance/emporium-lib
 ```
 
-To run the tests you can simple run:
+To run the tests to make sure that everything is still functionality correctly, you can use:
 
 ```shell
 npx hardhat test
 ```
+
+> **Important:**
+> You should not need to do this, but you can if you choose.
