@@ -1,0 +1,10 @@
+{
+	"name": "@nftchance/emporium-lib",
+	"devDependencies": {
+		"@nomicfoundation/hardhat-toolbox": "^3.0.0",
+		"@trivago/prettier-plugin-sort-imports": "^4.2.0",
+		"delegatable-sol": "0.0.0-beta.3",
+		"hardhat": "^2.17.3",
+		"prettier": "^3.0.3"
+	}
+}
