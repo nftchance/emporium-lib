@@ -20,5 +20,5 @@ To run the tests to make sure that everything is still functionality correctly, 
 npx hardhat test
 ```
 
-> **Important:**
+> **Important**
 > You should not need to do this, but you can if you choose.
