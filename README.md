@@ -17,7 +17,7 @@ pnpm i @nftchance/emporium-lib
 To run the tests to make sure that everything is still functionality correctly, you can use:
 
 ```shell
-npx hardhat test
+pnpm hardhat test
 ```
 
 > **Important**

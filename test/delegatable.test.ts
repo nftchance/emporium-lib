@@ -1,32 +1,10 @@
 import { loadFixture } from '@nomicfoundation/hardhat-toolbox/network-helpers'
-import { ethers, network } from 'hardhat'
 
-import { DelegatableUtil } from '../src/delegatable'
 import { expect } from 'chai'
 
-const [name, version] = ['Echo', '0.1.0']
+import { deploy, name, version } from '../lib/functions/deploy'
 
 describe('Delegatable', function () {
-	async function getChainId() {
-		return await network.provider.send('eth_chainId').then(BigInt)
-	}
-
-	async function deploy() {
-		const chainId = await getChainId()
-
-		const [owner, notOwner] = await ethers.getSigners()
-
-		const contract = await (
-			await ethers.getContractFactory('Echo')
-		).deploy(name, version)
-
-		const address = await contract.getAddress()
-
-		const util = await new DelegatableUtil().init(contract, name, version)
-
-		return { chainId, contract, address, util, owner, notOwner }
-	}
-
 	it('pass: instantiate a DelegatableUtil class instance', async function () {
 		const { chainId, address, util } = await loadFixture(deploy)
 
