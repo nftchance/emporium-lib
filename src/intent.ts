@@ -17,7 +17,7 @@ export type BaseSignedIntent<
 	TPrimaryType extends string,
 	TIntent = Record<string, unknown>
 > = {
-	[x in Lowercase<TPrimaryType> as `${x}`]: TIntent
+	[x in Lowercase<TPrimaryType>]: TIntent
 } & {
 	signature: string
 	signerIsContract: boolean

@@ -1,7 +1,7 @@
 import { ContractTransactionResponse, Signer } from 'ethers'
 
 import { EIP712_TYPES } from '../lib/constants'
-import { Delegation, Intent } from './intent'
+import { Intent } from './intent'
 import {
 	Invocations,
 	SignedDelegation,
