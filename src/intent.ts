@@ -33,8 +33,8 @@ export type BaseSignedIntent<
  * @template TSignedIntent The type of the signed intent message.
  */
 export class Intent<
-	TPrimaryType extends string,
-	TIntent extends Record<string, unknown>,
+	TPrimaryType extends string = string,
+	TIntent extends Record<string, unknown> = Record<string, unknown>,
 	TSignedIntent extends BaseSignedIntent<
 		TPrimaryType,
 		TIntent

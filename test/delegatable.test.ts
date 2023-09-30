@@ -4,7 +4,6 @@ import { ethers } from 'hardhat'
 import { expect } from 'chai'
 
 import { deploy, name, version } from '../lib/functions/deploy'
-import { InvocationsStruct } from '../typechain-types/contracts/Echo'
 
 describe('Delegatable', function () {
 	it('pass: instantiate a DelegatableUtil class instance', async function () {
@@ -37,31 +36,31 @@ describe('Delegatable', function () {
 		)
 	})
 
-	it('pass: getInovcationsTypedDataHash(Invocations memory invocations)', async function () {
+	it('pass: getInvocationsTypedDataHash(Invocations memory invocations)', async function () {
 		const { util, contract, owner, notOwner } = await loadFixture(deploy)
 
-		const delegation = await util.sign(
-			'Delegation',
-			{
-				delegate: await notOwner.getAddress(),
-				authority: ethers.ZeroHash,
-				caveats: []
-			},
-			owner
-		)
+		const delegation = (
+			await util.sign(
+				'Delegation',
+				{
+					delegate: await notOwner.getAddress(),
+					authority: ethers.ZeroHash,
+					caveats: []
+				},
+				owner
+			)
+		).signedMessage
 
-		const signedDelegation = delegation.signedMessage
+		if (delegation === null) throw new Error('Signed delegation is null')
 
-		if (!signedDelegation) throw new Error('Signed delegation is null')
-
-		const invocation: InvocationsStruct = {
+		const invocation = {
 			replayProtection: {
 				nonce: '0x01',
 				queue: '0x00'
 			},
 			batch: [
 				{
-					authority: [signedDelegation],
+					authority: [delegation],
 					transaction: {
 						to: await contract.getAddress(),
 						gasLimit: 21000000000000,

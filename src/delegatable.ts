@@ -2,28 +2,18 @@ import { ContractTransactionResponse, Signer } from 'ethers'
 
 import { EIP712_TYPES } from '../lib/constants'
 import { Intent } from './intent'
-import {
-	Invocations,
-	SignedDelegation,
-	SignedInvocation,
-	TypedIntent
-} from './types'
+import { TypedIntent } from './intent.types'
 
-type IntentContract = {
-	deploymentTransaction(): ContractTransactionResponse
-	getAddress(): Promise<string>
-}
-type IntentPrimaryTypes = keyof typeof EIP712_TYPES
-type IntentTypes = Delegation | Invocations
-type SignedIntentTypes =
-	| Intent<Delegation, SignedDelegation>
-	| Intent<Invocations, SignedInvocation>
-
-export class DelegatableUtil<TContract extends IntentContract> {
+export class DelegatableUtil<
+	TContract extends {
+		deploymentTransaction(): ContractTransactionResponse
+		getAddress(): Promise<string>
+	}
+> {
 	contract: TContract | null = null
 	info: TypedIntent | null = null
 
-	signedIntents: Array<SignedIntentTypes> = []
+	signedIntents: Array<unknown> = []
 
 	async init(
 		contract: TContract,
@@ -50,18 +40,13 @@ export class DelegatableUtil<TContract extends IntentContract> {
 		return this
 	}
 
-	async sign<TIntent extends IntentTypes>(
-		primaryType: IntentPrimaryTypes,
-		intent: TIntent extends Delegation
-			? Delegation
-			: TIntent extends Invocations
-			? Invocations
-			: never,
-		signer: Signer
-	) {
+	async sign<
+		TPrimaryType extends string,
+		TIntent extends Record<string, unknown>
+	>(primaryType: TPrimaryType, intent: TIntent, signer: Signer) {
 		if (!this.info) throw new Error('Contract info not initialized')
 
-		const signedIntent = await new Intent(
+		const signedIntent = await new Intent<TPrimaryType, TIntent>(
 			signer,
 			this.info.domain,
 			primaryType,
