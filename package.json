@@ -5,5 +5,8 @@
 		"@nomicfoundation/hardhat-toolbox": "^3.0.0",
 		"delegatable-sol": "0.0.0-beta.3",
 		"hardhat": "^2.17.4"
+	},
+	"dependencies": {
+		"ethers": "^6.7.1"
 	}
 }
