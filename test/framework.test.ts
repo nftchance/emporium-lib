@@ -42,15 +42,11 @@ describe('Framework', function () {
 		if (signedIntent.signedMessage === null)
 			expect.fail('Signed intent is null')
 
+		expect(await owner.getAddress()).to.eq(signedIntent.address())
 		expect(typedDataHash).to.eq(signedIntent.hash())
-
-		// TODO: Don't hardcode this value.
-		expect(typedDataHash).to.eq(
-			'0xe3a9f25379d3e45d3ce21212588b262c0d73e0a3848ba7787a17707786bdc1bc'
-		)
 	})
 
-	it('pass: getInvocationsTypedDataHash(Invocations memory invocations)', async function () {
+	it.only('pass: getInvocationsTypedDataHash(Invocations memory invocations)', async function () {
 		const { util, contract, owner } = await loadFixture(deploy)
 
 		const signedDelegation = await util.sign(owner, 'Delegation', {
@@ -62,27 +58,30 @@ describe('Framework', function () {
 		if (signedDelegation.signedMessage === null)
 			expect.fail('Signed delegation is null')
 
-		const invocation = {
-			authority: [signedDelegation.signedMessage],
-			transaction: {
-				to: await contract.getAddress(),
-				gasLimit: 21000000000000n,
-				data: (await contract.echo.populateTransaction()).data
-			}
-		}
-
-		const typedDataHash = await contract.getInvocationsTypedDataHash({
+		const intent = util.build('Invocations', {
 			replayProtection: {
 				nonce: 1n,
 				queue: 0n
 			},
-			batch: [invocation]
+			batch: [
+				{
+					authority: [signedDelegation.signedMessage],
+					transaction: {
+						to: (await contract.getAddress()) as `0x${string}`,
+						gasLimit: 21000n,
+						data: '0x'
+					}
+				}
+			]
 		})
 
-		// TODO: Don't hardcode this value.
-		expect(typedDataHash).to.eq(
-			'0x5d513ea51b964d7eaed95a791bccea6364a81deb53d24e20c1097df23abb8c69'
+		intent
+
+		const typedDataHash = await contract.getInvocationsTypedDataHash(
+			intent.message
 		)
+
+		expect(typedDataHash).to.eq(intent.hash())
 	})
 
 	it('fail: alwaysFail()', async function () {

@@ -1,9 +1,10 @@
 import {
+	AddressLike,
 	Signer,
 	TypedDataDomain,
 	TypedDataEncoder,
 	TypedDataField,
-	verifyMessage
+	verifyTypedData
 } from 'ethers'
 
 import {
@@ -20,15 +21,17 @@ export class Intent<
 	TSignedIntent extends PrimaryTypeSigned<TPrimaryType, TIntent>
 > {
 	encoder: TypedDataEncoder
+	signer: Signer | null = null
 	signedMessage: TSignedIntent | null = null
 
 	constructor(
-		public readonly signer: Signer,
 		public readonly domain: TypedDataDomain,
 		public readonly types: TPrimaryTypes,
 		public readonly primaryType: TPrimaryType,
 		public readonly message: TIntent
 	) {
+		console.log(this.types)
+
 		this.encoder = new TypedDataEncoder(
 			this.types as unknown as Record<string, Array<TypedDataField>>
 		)
@@ -38,8 +41,12 @@ export class Intent<
 		return this.primaryType.toLowerCase() as Lowercase<TPrimaryType>
 	}
 
-	async init() {
+	async init(signer: Signer | null) {
 		if (this.signedMessage) return this
+
+		this.signer = signer
+
+		if (!this.signer) throw new Error('Signer not initialized')
 
 		const signature = await this.signer.signTypedData(
 			this.domain,
@@ -57,19 +64,33 @@ export class Intent<
 		return this
 	}
 
-	address() {
-		if (!this.signedMessage) throw new Error('Signed message not found')
+	address(signature?: string) {
+		if (signature === undefined) signature = this.signedMessage?.signature
 
-		return verifyMessage(this.hash(), this.signedMessage.signature)
+		if (signature === undefined)
+			throw new Error('Signature not initialized')
+
+		return verifyTypedData(
+			this.domain,
+			this.types as unknown as Record<string, Array<TypedDataField>>,
+			this.message,
+			signature
+		)
 	}
 
-	verify(address: string) {
-		if (!this.signedMessage) throw new Error('Signed message not found')
-
+	verify(address: AddressLike | `0x${string}`) {
 		return this.address() === address
 	}
 
-	hash() {
-		return this.encoder.encode(this.message)
+	hash(message?: TIntent) {
+		if (message === undefined) message = this.message
+
+		if (message === undefined) throw new Error('Message not initialized')
+
+		return TypedDataEncoder.hash(
+			this.domain,
+			this.types as unknown as Record<string, Array<TypedDataField>>,
+			message
+		)
 	}
 }

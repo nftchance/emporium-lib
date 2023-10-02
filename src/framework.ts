@@ -45,19 +45,25 @@ export class Framework {
 		return this
 	}
 
-	async sign<
+	build<
 		TPrimaryType extends PrimaryType<PrimaryTypes>,
 		TIntent extends PrimaryTypeStruct<PrimaryTypes, TPrimaryType>
-	>(signer: Signer, primaryType: TPrimaryType, intent: TIntent) {
+	>(primaryType: TPrimaryType, intent: TIntent) {
 		if (!this.info) throw new Error('Contract info not initialized')
 
-		const signedIntent = await new Intent(
-			signer,
+		return new Intent(
 			this.info.domain,
 			this.info.types[primaryType],
 			primaryType,
 			intent
-		).init()
+		)
+	}
+
+	async sign<
+		TPrimaryType extends PrimaryType<PrimaryTypes>,
+		TIntent extends PrimaryTypeStruct<PrimaryTypes, TPrimaryType>
+	>(signer: Signer, primaryType: TPrimaryType, intent: TIntent) {
+		const signedIntent = await this.build(primaryType, intent).init(signer)
 
 		this.signedIntents.push(signedIntent)
 
