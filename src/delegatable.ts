@@ -1,8 +1,30 @@
-import { ContractTransactionResponse, Signer } from 'ethers'
+import { ContractTransactionResponse, Signer, TypedDataDomain } from 'ethers'
 
-import { EIP712_TYPES } from '../lib/constants'
-import { Intent } from './intent'
-import { TypedIntent } from './intent.types'
+import { TypedDataToPrimitiveTypes } from 'abitype'
+
+import { PRIMARY_TYPES } from '../lib/constants'
+
+type PrimaryTypes<
+	TPrimaryTypes extends typeof PRIMARY_TYPES = typeof PRIMARY_TYPES
+> = typeof PRIMARY_TYPES extends TPrimaryTypes ? typeof PRIMARY_TYPES : never
+
+type PrimaryType<TPrimaryTypes extends PrimaryTypes> =
+	keyof TPrimaryTypes extends string ? keyof TPrimaryTypes : never
+
+type PrimaryTypeStructs = {
+	[K in keyof PrimaryTypes]: TypedDataToPrimitiveTypes<PrimaryTypes[K]>
+}
+
+type PrimaryTypeToStruct<
+	TPrimaryTypes extends PrimaryTypes,
+	TPrimaryType extends PrimaryType<TPrimaryTypes>
+> = {
+	[K in TPrimaryType]: K extends keyof PrimaryTypeStructs
+		? K extends keyof PrimaryTypeStructs[K]
+			? PrimaryTypeStructs[K][K]
+			: never
+		: never
+}[TPrimaryType]
 
 export class DelegatableUtil<
 	TContract extends {
@@ -10,25 +32,24 @@ export class DelegatableUtil<
 		getAddress(): Promise<string>
 	}
 > {
-	contract: TContract | null = null
-	info: TypedIntent | null = null
+	info: {
+		domain: TypedDataDomain
+		types: PrimaryTypes
+	} | null = null
 
 	signedIntents: Array<unknown> = []
 
+	constructor(public readonly contract: TContract) {}
+
 	async init(
-		contract: TContract,
 		name: string,
 		version = '0.0.0',
-		types = EIP712_TYPES
+		types = PRIMARY_TYPES as PrimaryTypes
 	) {
-		if (this.info) return this
-
-		this.contract = contract
-
-		contract.getAddress().then(address => {
+		this.contract.getAddress().then(address => {
 			this.info = {
 				domain: {
-					chainId: contract.deploymentTransaction()?.chainId,
+					chainId: this.contract.deploymentTransaction()?.chainId,
 					verifyingContract: address,
 					name,
 					version
@@ -40,27 +61,26 @@ export class DelegatableUtil<
 		return this
 	}
 
-	async sign<
-		TPrimaryType extends string,
-		TIntent extends Record<string, unknown>
-	>(primaryType: TPrimaryType, intent: TIntent, signer: Signer) {
-		if (!this.info) throw new Error('Contract info not initialized')
+	async sign(
+		signer: Signer,
+		primaryType: PrimaryType<PrimaryTypes>,
+		intent: PrimaryTypeToStruct<PrimaryTypes, keyof PrimaryTypes>
+	) {
+		signer
+		primaryType
+		intent
 
-		const signedIntent = await new Intent<TPrimaryType, TIntent>(
-			signer,
-			this.info.domain,
-			primaryType,
-			intent,
-			this.info.types
-		).init()
+		throw new Error('Not implemented')
 
-		this.signedIntents.push(signedIntent)
-
-		return signedIntent
+		// if (!this.info) throw new Error('Contract info not initialized')
+		// const signedIntent = await new Intent(
+		// 	signer,
+		// 	this.info.domain,
+		// 	this.info.types[primaryType],
+		// 	primaryType,
+		// 	intent
+		// ).init()
+		// this.signedIntents.push(signedIntent)
+		// return signedIntent
 	}
-
-	// * There may be more functions here in the future, but for now, this is all we need.
-	//
-	// * If you would like to extend this class, please do so in a seperate file, and
-	//   submit a pull request to the main repo.
 }

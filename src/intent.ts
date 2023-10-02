@@ -1,11 +1,12 @@
-import {
-	Signer,
-	TypedDataDomain,
-	TypedDataEncoder,
-	TypedDataField
-} from 'ethers'
+import { Signer, TypedDataDomain } from 'ethers'
 
-import { EIP712_TYPES } from '../lib/constants'
+import { TypedDataToPrimitiveTypes } from 'abitype'
+
+import { PRIMARY_TYPES } from '../lib/constants'
+
+type PrimaryTypes = (typeof PRIMARY_TYPES)[keyof typeof PRIMARY_TYPES]
+type PrimaryType<TPrimaryTypes extends PrimaryTypes> =
+	keyof TPrimaryTypes extends string ? keyof TPrimaryTypes : never
 
 /**
  * The base executable body of a signed intent message.
@@ -15,7 +16,7 @@ import { EIP712_TYPES } from '../lib/constants'
  */
 export type BaseSignedIntent<
 	TPrimaryType extends string,
-	TIntent = Record<string, unknown>
+	TIntent extends Record<string, unknown>
 > = {
 	[x in Lowercase<TPrimaryType>]: TIntent
 } & {
@@ -28,19 +29,17 @@ export type BaseSignedIntent<
  * by an Ethereum account with discrete permission conditions.
  *
  * @class Intent
- * @template TPrimaryType The type of the primary type of the intent message.
+ * @template TPrimaryTypes All of the available primary types of the intent message.
+ * @template TPrimaryType Key of the primary type of the intent message.
  * @template TIntent The type of the intent message.
  * @template TSignedIntent The type of the signed intent message.
  */
 export class Intent<
-	TPrimaryType extends string = string,
-	TIntent extends Record<string, unknown> = Record<string, unknown>,
-	TSignedIntent extends BaseSignedIntent<
-		TPrimaryType,
-		TIntent
-	> = BaseSignedIntent<TPrimaryType, TIntent>
+	TPrimaryTypes extends PrimaryTypes,
+	TPrimaryType extends PrimaryType<TPrimaryTypes>,
+	TIntent extends TypedDataToPrimitiveTypes<TPrimaryTypes>[TPrimaryType],
+	TSignedIntent extends BaseSignedIntent<TPrimaryType, TIntent>
 > {
-	encoder: TypedDataEncoder
 	signedMessage: TSignedIntent | null = null
 
 	/**
@@ -55,15 +54,10 @@ export class Intent<
 	constructor(
 		public readonly signer: Signer,
 		public readonly domain: TypedDataDomain,
+		public readonly types: TPrimaryTypes,
 		public readonly primaryType: TPrimaryType,
-		public readonly message: TIntent,
-		public readonly types: Record<
-			string,
-			Array<TypedDataField>
-		> = EIP712_TYPES
-	) {
-		this.encoder = new TypedDataEncoder(this.types)
-	}
+		public readonly message: TIntent
+	) {}
 
 	/**
 	 * Returns the primary type of the intent message formatted as a
@@ -84,20 +78,19 @@ export class Intent<
 	 * If not provided, the signer will be used to sign the intent message.
 	 * @returns The initialized signed intent.
 	 */
-	async init(signature: string | undefined = undefined) {
-		if (signature === undefined)
-			signature = await this.signer.signTypedData(
-				...[this.domain, this.types, this.message]
-			)
-
-		if (this.signedMessage === null)
-			this.signedMessage = {
-				[this._primaryType()]: this.message,
-				signature,
-				signerIsContract: false
-			} as TSignedIntent
-		else this.signedMessage.signature = signature
-
-		return this
+	async init() {
+		// if (signature === undefined)
+		// 	signature = await this.signer.signTypedData(
+		// 		this.domain,
+		// 		this.types,
+		// 		this.message
+		// 	)
+		// if (this.signedMessage === null)
+		// 	this.signedMessage = {
+		// 		[this._primaryType()]: this.message,
+		// 		signature,
+		// 		signerIsContract: false
+		// 	} as TSignedIntent
+		// return this
 	}
 }

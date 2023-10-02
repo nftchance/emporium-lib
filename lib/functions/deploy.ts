@@ -16,7 +16,7 @@ export async function deploy() {
 
 	const address = await contract.getAddress()
 
-	const util = await new DelegatableUtil().init(contract, name, version)
+	const util = await new DelegatableUtil(contract).init(name, version)
 
 	return { chainId, contract, address, util, owner, notOwner }
 }
