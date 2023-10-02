@@ -4,7 +4,7 @@ import { PRIMARY_TYPES } from './constants'
 
 export type PrimaryTypes<
 	TPrimaryTypes extends typeof PRIMARY_TYPES = typeof PRIMARY_TYPES
-> = typeof PRIMARY_TYPES extends TPrimaryTypes ? typeof PRIMARY_TYPES : never
+> = TPrimaryTypes
 
 export type PrimaryType<TPrimaryTypes = PrimaryTypes> =
 	keyof TPrimaryTypes extends string ? keyof TPrimaryTypes : never

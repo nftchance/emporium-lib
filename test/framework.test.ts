@@ -5,8 +5,11 @@ import { expect } from 'chai'
 
 import { deploy, name, version } from '../lib/functions/deploy'
 
-describe('Delegatable', function () {
-	it('pass: instantiate a DelegatableUtil class instance', async function () {
+// Note: Right now, signedDelegation is being used in places with the value of `signerIsContract` but
+//       it is not used onchain so I am not sure if we should actually be providing that value or not.
+
+describe('Framework', function () {
+	it('pass: instantiate a FrameworkUtil class instance', async function () {
 		const { chainId, address, util } = await loadFixture(deploy)
 
 		expect(util).to.not.be.null.and.not.be.undefined
@@ -37,7 +40,7 @@ describe('Delegatable', function () {
 	})
 
 	it('pass: getInvocationsTypedDataHash(Invocations memory invocations)', async function () {
-		const { util, owner } = await loadFixture(deploy)
+		const { util, contract, owner } = await loadFixture(deploy)
 
 		const signedDelegation = await util.sign(owner, 'Delegation', {
 			delegate: await owner.getAddress(),
@@ -48,30 +51,26 @@ describe('Delegatable', function () {
 		if (signedDelegation.signedMessage === null)
 			expect.fail('Signed delegation is null')
 
-		signedDelegation.signedMessage.delegation
+		const invocation = {
+			authority: [signedDelegation.signedMessage],
+			transaction: {
+				to: await contract.getAddress(),
+				gasLimit: 21000000000000,
+				data: (await contract.echo.populateTransaction()).data
+			}
+		}
 
-		//     signedDelegation.signedMessage.signature
+		const typedDataHash = await contract.getInvocationsTypedDataHash({
+			replayProtection: {
+				nonce: '0x01',
+				queue: '0x00'
+			},
+			batch: [invocation]
+		})
 
-		// const invocation = {
-		// 	authority: [signedDelegation.signedMessage],
-		// 	transaction: {
-		// 		to: await contract.getAddress(),
-		// 		gasLimit: 21000000000000,
-		// 		data: (await contract.echo.populateTransaction()).data
-		// 	}
-		// }
-
-		// const typedDataHash = await contract.getInvocationsTypedDataHash({
-		// 	replayProtection: {
-		// 		nonce: '0x01',
-		// 		queue: '0x00'
-		// 	},
-		// 	batch: [invocation]
-		// })
-
-		// expect(typedDataHash).to.eq(
-		// 	'0xd08e94024222c7c56fa238e76069cabe225eb76c202d031c3fb72028001ab631'
-		// )
+		expect(typedDataHash).to.eq(
+			'0xd08e94024222c7c56fa238e76069cabe225eb76c202d031c3fb72028001ab631'
+		)
 	})
 
 	it('pass: sign a delegation', async function () {

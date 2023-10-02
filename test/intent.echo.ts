@@ -4,7 +4,7 @@ import { expect } from 'chai'
 
 import { deploy } from '../lib/functions/deploy'
 
-describe('Delegatable', function () {
+describe('Framework', function () {
 	it('pass: call echo', async function () {
 		const { contract, notOwner } = await loadFixture(deploy)
 
