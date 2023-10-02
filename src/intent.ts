@@ -1,4 +1,10 @@
-import { Signer, TypedDataDomain, TypedDataField } from 'ethers'
+import {
+	Signer,
+	TypedDataDomain,
+	TypedDataEncoder,
+	TypedDataField,
+	verifyMessage
+} from 'ethers'
 
 import {
 	PrimaryType,
@@ -13,6 +19,7 @@ export class Intent<
 	TIntent extends PrimaryTypeStruct<PrimaryTypes, keyof PrimaryTypes>,
 	TSignedIntent extends PrimaryTypeSigned<TPrimaryType, TIntent>
 > {
+	encoder: TypedDataEncoder
 	signedMessage: TSignedIntent | null = null
 
 	constructor(
@@ -21,14 +28,18 @@ export class Intent<
 		public readonly types: TPrimaryTypes,
 		public readonly primaryType: TPrimaryType,
 		public readonly message: TIntent
-	) {}
+	) {
+		this.encoder = new TypedDataEncoder(
+			this.types as unknown as Record<string, Array<TypedDataField>>
+		)
+	}
 
 	private _primaryType() {
 		return this.primaryType.toLowerCase() as Lowercase<TPrimaryType>
 	}
 
 	async init() {
-		if (!this.signedMessage) return this
+		if (this.signedMessage) return this
 
 		const signature = await this.signer.signTypedData(
 			this.domain,
@@ -36,8 +47,6 @@ export class Intent<
 			this.types as unknown as Record<string, Array<TypedDataField>>,
 			this.message
 		)
-
-		if (!signature) throw new Error('Signature not found')
 
 		this.signedMessage = {
 			[this._primaryType()]: this.message,
@@ -48,22 +57,19 @@ export class Intent<
 		return this
 	}
 
-	// TODO: Determine the address that signed the message using the base
-	//       message and the signed message.
 	address() {
-		throw new Error('Not implemented')
+		if (!this.signedMessage) throw new Error('Signed message not found')
+
+		return verifyMessage(this.hash(), this.signedMessage.signature)
 	}
 
-	// TODO: Verify whether or not an address was the signer of the message.
 	verify(address: string) {
-		address
+		if (!this.signedMessage) throw new Error('Signed message not found')
 
-		throw new Error('Not implemented')
+		return this.address() === address
 	}
 
-	// TODO: Return the hash of the intent message which is used for signing,
-	//       verifying, quick look-up and comparison.
 	hash() {
-		throw new Error('Not implemented')
+		return this.encoder.encode(this.message)
 	}
 }

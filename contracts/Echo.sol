@@ -15,4 +15,8 @@ contract Echo is Delegatable {
     function echo() external {
         emit Echoed(_msgSender());
     }
+
+    function alwaysFail() public pure { 
+        revert("I always fail");
+    }
 }

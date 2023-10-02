@@ -19,8 +19,7 @@ Built using:
 
 ```ml
 ├─ abitype - "Parse EIP712 types to typesafe structs."
-├─ ethers - "Provides the peripheral functionality needed to work with onchain Ethereum accounts."
-├─ hardhat - "Powering the chain-based tests, Hardhat ensures the library always functions."
+├─ viem - "Lightweight, composable, and type-safe modules that interface with Ethereum."
 └─ typescript - "You will find types for each piece to make working with the library simple."
 ```
 
@@ -45,6 +44,8 @@ In the beginning stages, you likely aren't going to want to extend the framework
 const metadata = ['Echo', '0.1.0']
 
 // * Prepare your contract reference -- You can connect however you prefer.
+// ! Echo is just an example, you will use your contract that 
+//   extends the framework onchain here.
 const contract = await (
     await ethers.getContractFactory('Echo')
 ).deploy(...metadata)

@@ -37,11 +37,6 @@ export const INVOCATIONS_TYPES = {
 	Invocations: [
 		{ name: 'batch', type: 'Invocation[]' },
 		{ name: 'replayProtection', type: 'ReplayProtection' }
-	],
-	SignedInvocation: [
-		{ name: 'invocations', type: 'Invocations' },
-		{ name: 'signature', type: 'bytes' },
-		{ name: 'signerIsContract', type: 'bool' }
 	]
 } as const
 

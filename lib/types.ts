@@ -27,6 +27,6 @@ export type PrimaryTypeStruct<
 export type PrimaryTypeSigned<TPrimaryType extends string, TIntent> = {
 	[K in Lowercase<TPrimaryType>]: TIntent
 } & {
-	signature: string
+	signature: `0x${string}`
 	signerIsContract: boolean
 }
