@@ -33,3 +33,28 @@ To install this library in your repository for personal use run:
 ```shell
 pnpm i @nftchance/emporium-lib
 ```
+
+### Basic Usage
+
+In the beginning stages, you likely aren't going to want to extend the framework. With instant access to signing and management of `Delegation` and `Invocations` you can prepare your codebase for framework consumption in just a few lines:
+
+```typescript
+// * Prepare the EIP-712 domain metadata.
+const metadata = ['Echo', '0.1.0']
+
+// * Prepare your contract reference -- You can connect however you prefer.
+const contract = await (
+    await ethers.getContractFactory('Echo')
+).deploy(...metadata)
+
+// * Instantiate the framework to handle your Intents.
+const util = await new Framework(contract).init(...metadata)
+
+// * Easily sign and manage the resulting body with type safety 
+//   and access to the built-in utility functions.
+const signedDelegation = await util.sign(owner, 'Delegation', {
+    delegate: await owner.getAddress(),
+    authority: ethers.ZeroHash as `0x${string}`,
+    caveats: []
+})
+```
