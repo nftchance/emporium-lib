@@ -2,11 +2,7 @@ import { Signer, TypedDataDomain } from 'ethers'
 
 import { TypedDataToPrimitiveTypes } from 'abitype'
 
-import { PRIMARY_TYPES } from '../lib/constants'
-
-type PrimaryTypes = (typeof PRIMARY_TYPES)[keyof typeof PRIMARY_TYPES]
-type PrimaryType<TPrimaryTypes extends PrimaryTypes> =
-	keyof TPrimaryTypes extends string ? keyof TPrimaryTypes : never
+import { PrimaryType, PrimaryTypes } from '../lib/types'
 
 /**
  * The base executable body of a signed intent message.
@@ -35,8 +31,8 @@ export type BaseSignedIntent<
  * @template TSignedIntent The type of the signed intent message.
  */
 export class Intent<
-	TPrimaryTypes extends PrimaryTypes,
-	TPrimaryType extends PrimaryType<TPrimaryTypes>,
+	TPrimaryTypes extends PrimaryTypes[keyof PrimaryTypes],
+	TPrimaryType extends PrimaryType<PrimaryTypes>,
 	TIntent extends TypedDataToPrimitiveTypes<TPrimaryTypes>[TPrimaryType],
 	TSignedIntent extends BaseSignedIntent<TPrimaryType, TIntent>
 > {
@@ -91,6 +87,6 @@ export class Intent<
 		// 		signature,
 		// 		signerIsContract: false
 		// 	} as TSignedIntent
-		// return this
+		return this
 	}
 }

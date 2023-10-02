@@ -1,30 +1,8 @@
 import { ContractTransactionResponse, Signer, TypedDataDomain } from 'ethers'
 
-import { TypedDataToPrimitiveTypes } from 'abitype'
-
 import { PRIMARY_TYPES } from '../lib/constants'
-
-type PrimaryTypes<
-	TPrimaryTypes extends typeof PRIMARY_TYPES = typeof PRIMARY_TYPES
-> = typeof PRIMARY_TYPES extends TPrimaryTypes ? typeof PRIMARY_TYPES : never
-
-type PrimaryType<TPrimaryTypes extends PrimaryTypes> =
-	keyof TPrimaryTypes extends string ? keyof TPrimaryTypes : never
-
-type PrimaryTypeStructs = {
-	[K in keyof PrimaryTypes]: TypedDataToPrimitiveTypes<PrimaryTypes[K]>
-}
-
-type PrimaryTypeToStruct<
-	TPrimaryTypes extends PrimaryTypes,
-	TPrimaryType extends PrimaryType<TPrimaryTypes>
-> = {
-	[K in TPrimaryType]: K extends keyof PrimaryTypeStructs
-		? K extends keyof PrimaryTypeStructs[K]
-			? PrimaryTypeStructs[K][K]
-			: never
-		: never
-}[TPrimaryType]
+import { PrimaryType, PrimaryTypes, PrimaryTypeToStruct } from '../lib/types'
+import { Intent } from './intent'
 
 export class DelegatableUtil<
 	TContract extends {
@@ -43,7 +21,7 @@ export class DelegatableUtil<
 
 	async init(
 		name: string,
-		version = '0.0.0',
+		version: string,
 		types = PRIMARY_TYPES as PrimaryTypes
 	) {
 		this.contract.getAddress().then(address => {
@@ -66,21 +44,18 @@ export class DelegatableUtil<
 		primaryType: PrimaryType<PrimaryTypes>,
 		intent: PrimaryTypeToStruct<PrimaryTypes, keyof PrimaryTypes>
 	) {
-		signer
-		primaryType
-		intent
+		if (!this.info) throw new Error('Contract info not initialized')
 
-		throw new Error('Not implemented')
+		const signedIntent = await new Intent(
+			signer,
+			this.info.domain,
+			this.info.types[primaryType],
+			primaryType,
+			intent
+		).init()
 
-		// if (!this.info) throw new Error('Contract info not initialized')
-		// const signedIntent = await new Intent(
-		// 	signer,
-		// 	this.info.domain,
-		// 	this.info.types[primaryType],
-		// 	primaryType,
-		// 	intent
-		// ).init()
-		// this.signedIntents.push(signedIntent)
-		// return signedIntent
+		this.signedIntents.push(signedIntent)
+
+		return signedIntent
 	}
 }
