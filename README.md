@@ -26,6 +26,8 @@ Built using:
 
 ## Getting Started
 
+Getting up and running with the use of `Emporium` is incredibly straightforward. Built on top of Ethers, you can import the library into your existing codebase without need configuration, dependency dances, or managing the conflicts of trying to use dependencies that are not meant for both the browser & node environment.
+
 ### Installation
 
 To install this library in your repository for personal use run:
