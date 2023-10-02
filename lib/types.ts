@@ -13,7 +13,7 @@ export type PrimaryTypeStructs = {
 	[K in keyof PrimaryTypes]: TypedDataToPrimitiveTypes<PrimaryTypes[K]>
 }
 
-export type PrimaryTypeToStruct<
+export type PrimaryTypeStruct<
 	TPrimaryTypes extends PrimaryTypes,
 	TPrimaryType extends PrimaryType<TPrimaryTypes>
 > = {
@@ -22,8 +22,11 @@ export type PrimaryTypeToStruct<
 			? PrimaryTypeStructs[K][K]
 			: PrimaryTypeStructs[K]
 		: never
-}[TPrimaryType] extends infer T
-	? { [K in keyof T]: T[K] }
-	: never
+}[TPrimaryType]
 
-    
+export type PrimaryTypeSigned<TPrimaryType extends string, TIntent> = {
+	[K in Lowercase<TPrimaryType>]: TIntent
+} & {
+	signature: string
+	signerIsContract: boolean
+}

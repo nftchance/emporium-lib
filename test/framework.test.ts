@@ -45,10 +45,10 @@ describe('Delegatable', function () {
 			caveats: []
 		})
 
-		signedDelegation
+		if (signedDelegation.signedMessage === null)
+			expect.fail('Signed delegation is null')
 
-		// if (signedDelegation.signedMessage === null)
-		// 	expect.fail('Signed delegation is null')
+		signedDelegation.signedMessage.delegation
 
 		//     signedDelegation.signedMessage.signature
 

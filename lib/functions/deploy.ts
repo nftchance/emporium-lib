@@ -1,6 +1,6 @@
 import { ethers, network } from 'hardhat'
 
-import { DelegatableUtil } from '../../src/delegatable'
+import { Framework } from '../../src/framework'
 import { getChainId } from './chain'
 
 export const [name, version] = ['Echo', '0.1.0']
@@ -16,7 +16,7 @@ export async function deploy() {
 
 	const address = await contract.getAddress()
 
-	const util = await new DelegatableUtil(contract).init(name, version)
+	const util = await new Framework(contract).init(name, version)
 
 	return { chainId, contract, address, util, owner, notOwner }
 }
