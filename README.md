@@ -1,5 +1,7 @@
 # Emporium Library
 
+![Header image](README.png)
+
 Emporium is the fastest way to get up and running with the a typesafe intent-based architecture in Typescript. Here you can find Solver and Signer mechanisms of Emporium to create, execute, and validate the state of parallel intent declarations and transactions. 
 
 Without `Emporium`:
