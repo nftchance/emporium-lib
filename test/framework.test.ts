@@ -75,11 +75,27 @@ describe('Framework', function () {
 			]
 		})
 
-		intent
+		const typedDataHash = await contract.getInvocationsTypedDataHash({
+			replayProtection: {
+				nonce: 1n,
+				queue: 0n
+			},
+			batch: [
+				{
+					authority: [signedDelegation.signedMessage],
+					transaction: {
+						to: (await contract.getAddress()) as `0x${string}`,
+						gasLimit: 21000n,
+						data: '0x'
+					}
+				}
+			]
+		})
 
-		const typedDataHash = await contract.getInvocationsTypedDataHash(
-			intent.message
-		)
+		console.table({
+			typedDataHash,
+			hash: intent.hash()
+		})
 
 		expect(typedDataHash).to.eq(intent.hash())
 	})
