@@ -21,7 +21,7 @@ Built using:
 
 ```ml
 ├─ abitype - "Parse EIP712 types to typesafe structs."
-├─ viem - "Lightweight, composable, and type-safe modules that interface with Ethereum."
+├─ ethers - "Complete and compact library for interacting with the Ethereum Blockchain."
 └─ typescript - "You will find types for each piece to make working with the library simple."
 ```
 
