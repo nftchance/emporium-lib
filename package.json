@@ -2,9 +2,7 @@
 	"name": "@nftchance/emporium-lib",
 	"private": true,
 	"devDependencies": {
-		"@nomicfoundation/hardhat-toolbox": "^3.0.0",
-		"delegatable-sol": "0.0.0-beta.3",
-		"hardhat": "^2.17.4"
+		"@nomicfoundation/hardhat-toolbox": "^3.0.0"
 	},
 	"dependencies": {
 		"abitype": "^0.9.8",
